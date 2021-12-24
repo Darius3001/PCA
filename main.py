@@ -1,8 +1,9 @@
+#%%
 import numpy as np
-import lib
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import os
+import cv2
 
 def load_images(path: str, file_ending: str=".png") -> (list, int, int):
     images = []
@@ -93,14 +94,21 @@ pcs, svals, mean_data = calculate_pca(data_matrix)
 k = accumulated_energy(svals)
 pcs = pcs[:k]
 
-traincoefs = project_faces(pcs, images, mean_data)
+#traincoefs = project_faces(pcs, images, mean_data)
 
-scores, testimages, testcoeffs = identify_faces(traincoefs, pcs, mean_data, "./data/test")
+#scores, testimages, testcoeffs = identify_faces(traincoefs, pcs, mean_data, "./data/test")
 
-assembledimage = np.dot(pcs.T,testcoeffs[0])+mean_data
 
-plt.imshow(testimages[0],cmap=plt.get_cmap("gray"))
-plt.show()
-plt.imshow(assembledimage.reshape(dimy,dimx),cmap=plt.get_cmap("gray"))
-plt.show()
+cap = cv2.VideoCapture(0)
+while(True):
+  ret, frame = cap.read()
+  frame = cv2.resize(frame, (dimx,dimy))
+  frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+  cv2.imshow('frame',frame)
+  if cv2.waitKey(1) & 0xFF == ord('q'):
+    break
 
+cap.release()
+cv2.destroyAllWindows()
+
+# %%
