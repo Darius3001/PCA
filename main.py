@@ -100,13 +100,31 @@ pcs = pcs[:k]
 
 
 cap = cv2.VideoCapture(0)
+
 while(True):
-  ret, frame = cap.read()
-  frame = cv2.resize(frame, (dimx,dimy))
-  frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-  cv2.imshow('frame',frame)
-  if cv2.waitKey(1) & 0xFF == ord('q'):
-    break
+    ret, frame = cap.read()
+    #frame = cv2.resize(frame, (dimx,dimy))
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    ## mirror
+    frame = frame[:, ::-1]
+
+    midy, midx = frame.shape
+
+    midx/=2
+    midy/=2
+
+    innerframe = frame[int(midy-dimy/2):int(midy+dimy/2),int(midx-dimx/2):int(midx+dimx/2)]
+    
+    innerframe = innerframe.flatten()
+    
+    coefs = np.dot(pcs, innerframe)
+    innerframe = np.dot(pcs.T, coefs)
+
+    frame[int(midy-dimy/2):int(midy+dimy/2),int(midx-dimx/2):int(midx+dimx/2)] = innerframe.reshape(dimy,dimx)
+
+    cv2.imshow('frame',frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
 cap.release()
 cv2.destroyAllWindows()
