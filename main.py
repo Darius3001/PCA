@@ -2,11 +2,12 @@ import numpy as np
 import lib
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import os
 
 def load_images(path: str, file_ending: str=".png") -> (list, int, int):
     images = []
 
-    files = lib.list_directory(path)
+    files = os.listdir(path)
     files.sort()
 
     for i in files:
