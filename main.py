@@ -87,6 +87,9 @@ def identify_faces(coeffs_train: np.ndarray, pcs: np.ndarray, mean_data: np.ndar
 
     return scores, imgs_test, coeffs_test
 
+
+
+
 images, dimx, dimy = load_images("./data/train")
 data_matrix = setup_data_matrix(images)
 pcs, svals, mean_data = calculate_pca(data_matrix)
@@ -98,8 +101,9 @@ pcs = pcs[:k]
 
 #scores, testimages, testcoeffs = identify_faces(traincoefs, pcs, mean_data, "./data/test")
 
-
 cap = cv2.VideoCapture(0)
+
+print("Starting Video (Press q to quit)")
 
 while(True):
     ret, frame = cap.read()
@@ -113,14 +117,25 @@ while(True):
     midx/=2
     midy/=2
 
-    innerframe = frame[int(midy-dimy/2):int(midy+dimy/2),int(midx-dimx/2):int(midx+dimx/2)]
+    sizefactor = 2
+    
+
+    innerframe = frame[int(midy-sizefactor*dimy/2):int(midy+sizefactor*dimy/2),
+                       int(midx-sizefactor*dimx/2):int(midx+sizefactor*dimx/2)]
+
+    innerframe = cv2.resize(innerframe, (dimy,dimx))
     
     innerframe = innerframe.flatten()
     
     coefs = np.dot(pcs, innerframe)
     innerframe = np.dot(pcs.T, coefs)
 
-    frame[int(midy-dimy/2):int(midy+dimy/2),int(midx-dimx/2):int(midx+dimx/2)] = innerframe.reshape(dimy,dimx)
+    innerframe = innerframe.reshape(dimy,dimx)
+
+    innerframe = cv2.resize(innerframe, (sizefactor*dimx,sizefactor*dimy))
+
+    frame[int(midy-sizefactor*dimy/2):int(midy+sizefactor*dimy/2),
+          int(midx-sizefactor*dimx/2):int(midx+sizefactor*dimx/2)] = innerframe
 
     cv2.imshow('frame',frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
